@@ -36,11 +36,12 @@ export default function App() {
   if (localMins >= 60) localHour += 1;
 
   const period = localHour > 12 ? "PM" : "AM";
-  
+
   localHour %= 12;
   localMins %= 60;
   
-
+  let formattedMins = localMins <= 9 ? `0${localMins}` : localMins;
+  let localTime = `${localHour}:${formattedMins} ${period}`;
 
 
   return (
@@ -51,9 +52,12 @@ export default function App() {
       <section>
         <h2>Next growth stage in</h2>
         <h2>{hours} hours, {mins} minutes</h2>
-        <h2>{localHour}:{localMins} {period}</h2>
+        <h2>{localTime}</h2>
       </section>
-      <input type="number" onChange={handleInput} value={offset} />
+      <section>
+        <h2>Offset</h2>
+        <input type="number" onChange={handleInput} value={offset} />
+      </section>
     </div>
   );
 }
