@@ -21,7 +21,8 @@ export default function App() {
         <h1>Hespori Timer</h1>
       </header>
       <section>
-        <h2>{hours} hours, {mins} mins</h2>
+        <h2>Next growth stage in</h2>
+        <h2>{hours} hours, {mins} minutes</h2>
       </section>
     </div>
   );
