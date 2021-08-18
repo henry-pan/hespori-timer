@@ -53,7 +53,7 @@ export default function App() {
         <h1>Hespori Timer</h1>
       </header>
       <section>
-        <h2>Next growth stage in</h2>
+        <p>Next growth stage in</p>
         <h2>{hours} hours, {mins} minutes</h2>
         <h2>{localTime}</h2>
       </section>
