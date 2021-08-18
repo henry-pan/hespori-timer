@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from "react";
 
 export default function App() {
-  const [hours, setHours] = useState(10);
-  const [mins, setMins] = useState(40);
+  const [hours, setHours] = useState(Math.trunc((640 - (((Date.now() / 1000) / 60) % 640)) / 60));
+  const [mins, setMins] = useState(Math.trunc((640 - (((Date.now() / 1000) / 60) % 640)) % 60));
   const [offset, setOffset] = useState(localStorage.getItem("farmTickOffset") || 0);
+
 
   // Refresh timer
   useEffect(() => {
@@ -15,13 +16,14 @@ export default function App() {
     return () => clearInterval(interval);
   }, [hours, mins]);
 
+
   // Update localstorage when offset changed
   useEffect(() => {
     localStorage.setItem("farmTickOffset", offset);
   }, [offset]);
 
-  const handleInput = e => setOffset(e.target.value);
 
+  // Determine next growth tick in local time
   const timeNow = new Date();
 
   let nextHours = hours;
@@ -31,17 +33,18 @@ export default function App() {
     nextHours -= 1;
   }
 
-  let localHour = timeNow.getHours() + nextHours;
+  let localHours = timeNow.getHours() + nextHours;
   let localMins = timeNow.getMinutes() + nextMins + 1;
-  if (localMins >= 60) localHour += 1;
+  if (localMins >= 60) localHours += 1;
 
-  const period = localHour > 12 ? "PM" : "AM";
+  const period = (localHours % 24) >= 12 ? "PM" : "AM";
 
-  localHour %= 12;
+  localHours %= 12;
   localMins %= 60;
   
+  let formattedHours = localHours === 0 ? `12` : localHours;
   let formattedMins = localMins <= 9 ? `0${localMins}` : localMins;
-  let localTime = `${localHour}:${formattedMins} ${period}`;
+  let localTime = `${formattedHours}:${formattedMins} ${period}`;
 
 
   return (
@@ -56,7 +59,7 @@ export default function App() {
       </section>
       <section>
         <h2>Offset</h2>
-        <input type="number" onChange={handleInput} value={offset} />
+        <input type="number" onChange={e => setOffset(e.target.value)} value={offset} />
       </section>
     </div>
   );
