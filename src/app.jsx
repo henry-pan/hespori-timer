@@ -6,13 +6,22 @@ export default function App() {
   const [offset, setOffset] = useState(localStorage.getItem("farmTickOffset") || 0);
 
 
+  // Determine new time by subtracting the offset
+  const setNewTime = () => {
+    let timeLeft = 640 - (((Date.now() / 1000) / 60) % 640);
+    timeLeft -= offset - 1;
+    
+    // Ensures timeLeft is always between 0 and 640
+    while (timeLeft <= 0) timeLeft = (640 + timeLeft) % 640;
+
+    setHours(Math.trunc(timeLeft / 60));
+    setMins(Math.trunc(timeLeft % 60));
+  }
+
+
   // Refresh timer
   useEffect(() => {
-    const interval = setInterval(() => {
-      const timeLeft = 640 - (((Date.now() / 1000) / 60) % 640);
-      setHours(Math.trunc(timeLeft / 60));
-      setMins(Math.trunc(timeLeft % 60));
-    }, 1000);
+    const interval = setInterval(() => setNewTime(), 1000);
     return () => clearInterval(interval);
   }, [hours, mins]);
 
@@ -20,23 +29,14 @@ export default function App() {
   // Update localstorage when offset changed
   useEffect(() => {
     localStorage.setItem("farmTickOffset", offset);
+    setNewTime();
   }, [offset]);
 
 
   // Determine next growth tick in local time
   const timeNow = new Date();
-
-  let nextHours = hours;
-  let nextMins = mins - offset;
-  if (mins - offset < 0) {
-    nextMins += 60;
-    nextHours -= 1;
-  }
-
-  let localHours = timeNow.getHours() + nextHours;
-  let localMins = timeNow.getMinutes() + nextMins + 1;
-  if (localMins >= 60) localHours += 1;
-
+  let localMins = timeNow.getMinutes() + mins;
+  let localHours = timeNow.getHours() + hours + Math.trunc(localMins / 60);
   const period = (localHours % 24) >= 12 ? "PM" : "AM";
 
   localHours %= 12;
