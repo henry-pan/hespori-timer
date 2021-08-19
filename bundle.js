@@ -40,14 +40,25 @@ function App() {
   var _useState5 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(localStorage.getItem("farmTickOffset") || 0),
       _useState6 = _slicedToArray(_useState5, 2),
       offset = _useState6[0],
-      setOffset = _useState6[1]; // Refresh timer
+      setOffset = _useState6[1]; // Determine new time by subtracting the offset
+
+
+  var setNewTime = function setNewTime() {
+    var timeLeft = 640 - Date.now() / 1000 / 60 % 640;
+    timeLeft -= offset - 1; // Ensures timeLeft is always between 0 and 640
+
+    while (timeLeft <= 0) {
+      timeLeft = (640 + timeLeft) % 640;
+    }
+
+    setHours(Math.trunc(timeLeft / 60));
+    setMins(Math.trunc(timeLeft % 60));
+  }; // Refresh timer
 
 
   (0,react__WEBPACK_IMPORTED_MODULE_0__.useEffect)(function () {
     var interval = setInterval(function () {
-      var timeLeft = 640 - Date.now() / 1000 / 60 % 640;
-      setHours(Math.trunc(timeLeft / 60));
-      setMins(Math.trunc(timeLeft % 60));
+      return setNewTime();
     }, 1000);
     return function () {
       return clearInterval(interval);
@@ -56,20 +67,12 @@ function App() {
 
   (0,react__WEBPACK_IMPORTED_MODULE_0__.useEffect)(function () {
     localStorage.setItem("farmTickOffset", offset);
+    setNewTime();
   }, [offset]); // Determine next growth tick in local time
 
   var timeNow = new Date();
-  var nextHours = hours;
-  var nextMins = mins - offset;
-
-  if (mins - offset < 0) {
-    nextMins += 60;
-    nextHours -= 1;
-  }
-
-  var localHours = timeNow.getHours() + nextHours;
-  var localMins = timeNow.getMinutes() + nextMins + 1;
-  if (localMins >= 60) localHours += 1;
+  var localMins = timeNow.getMinutes() + mins;
+  var localHours = timeNow.getHours() + hours + Math.trunc(localMins / 60);
   var period = localHours % 24 >= 12 ? "PM" : "AM";
   localHours %= 12;
   localMins %= 60;
